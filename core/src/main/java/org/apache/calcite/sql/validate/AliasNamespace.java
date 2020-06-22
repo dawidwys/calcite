@@ -91,9 +91,11 @@ public class AliasNamespace extends AbstractNamespace {
     for (RelDataTypeField field : rowType.getFieldList()) {
       typeList.add(field.getType());
     }
-    return validator.getTypeFactory().createStructType(
+    RelDataType aliasedType = validator.getTypeFactory().createStructType(
+        rowType.getStructKind(),
         typeList,
         nameList);
+    return validator.getTypeFactory().createTypeWithNullability(aliasedType, rowType.isNullable());
   }
 
   private String getString(RelDataType rowType) {
