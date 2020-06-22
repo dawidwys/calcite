@@ -2938,6 +2938,11 @@ class SqlToRelConverterTest extends SqlToRelTestBase {
     sql(sql).ok();
   }
 
+  @Test void testNullableColumnAccess() {
+    final String sql = "select t.ROW_COLUMN.NOT_NULL_FIELD from NULLABLEROWS.NR_T1 t";
+    sql(sql).with(createTester().withCatalogReaderFactory(MockCatalogReaderExtended::new)).ok();
+  }
+
   @Test void testCustomColumnResolvingWithSelectFieldNameDotStar() {
     final String sql = "select f1.* from struct.t";
     sql(sql).ok();

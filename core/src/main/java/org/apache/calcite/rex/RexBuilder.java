@@ -211,12 +211,18 @@ public class RexBuilder {
    */
   private RexNode makeFieldAccessInternal(
       RexNode expr,
-      final RelDataTypeField field) {
+      RelDataTypeField field) {
+    final RelDataType fieldType;
+    if (expr.getType().isNullable()) {
+      fieldType = typeFactory.createTypeWithNullability(field.getType(), true);
+    } else {
+      fieldType = field.getType();
+    }
     if (expr instanceof RexRangeRef) {
       RexRangeRef range = (RexRangeRef) expr;
       if (field.getIndex() < 0) {
         return makeCall(
-            field.getType(),
+            fieldType,
             GET_OPERATOR,
             ImmutableList.of(
                 expr,
@@ -224,9 +230,15 @@ public class RexBuilder {
       }
       return new RexInputRef(
           range.getOffset() + field.getIndex(),
-          field.getType());
+          fieldType);
     }
-    return new RexFieldAccess(expr, field);
+
+    RexFieldAccess fieldAccess = new RexFieldAccess(expr, field);
+    if (!field.getType().equals(fieldType)) {
+      return makeCast(fieldType, fieldAccess, true);
+    } else {
+      return fieldAccess;
+    }
   }
 
   /**

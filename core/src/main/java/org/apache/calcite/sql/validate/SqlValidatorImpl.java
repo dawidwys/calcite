@@ -5844,12 +5844,17 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
           throw newValidationError(id.getComponent(i),
               RESOURCE.unknownField(name));
         }
-        type = field.getType();
+        if (type.isNullable()) {
+          type = typeFactory.createTypeWithNullability(field.getType(), true);
+        } else {
+          type = field.getType();
+        }
       }
       type =
           SqlTypeUtil.addCharsetAndCollation(
               type,
               getTypeFactory());
+
       return type;
     }
 
